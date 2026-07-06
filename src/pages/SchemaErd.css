@@ -1,0 +1,548 @@
+/* SchemaErd.css */
+
+.erd-page-container {
+  display: flex;
+  height: calc(100vh - 100px); /* Adjust to fit below header and breadcrumbs */
+  margin: -1.5rem; /* Negate padding of wrapper if any */
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+/* Sidebar styling */
+.erd-sidebar {
+  width: 280px;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 5;
+  transition: all 0.3s var(--transition-cubic);
+}
+
+.erd-sidebar-search {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.erd-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.erd-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+}
+
+.erd-search-input {
+  width: 100%;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.5rem 0.5rem 2.2rem;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.erd-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.erd-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+.erd-list-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.erd-entity-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.erd-entity-item:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.erd-entity-item.active {
+  background-color: var(--primary-glow);
+  border-color: var(--primary-glow-strong);
+}
+
+.erd-entity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.erd-entity-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.erd-entity-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Canvas Area */
+.erd-canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-main);
+  background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.erd-toolbar {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 4;
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  padding: 0.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.erd-toolbar-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.erd-toolbar-btn:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--primary);
+}
+
+.erd-viewport {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.erd-viewport:active {
+  cursor: grabbing;
+}
+
+/* Mermaid SVG customization */
+.erd-mermaid-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.erd-mermaid-root svg {
+  width: 100%;
+  height: 100%;
+}
+
+.erd-mermaid-root svg text {
+  font-family: var(--font-family) !important;
+  font-size: 11px !important;
+  fill: var(--text-main) !important;
+}
+
+.erd-mermaid-root svg text.er.entityLabel {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Hide relationship label box/text to keep clean lines */
+.erd-mermaid-root svg text.er.relationshipLabel,
+.erd-mermaid-root svg .relationshipLabel,
+.erd-mermaid-root svg .edgeLabel {
+  display: none !important;
+}
+
+/* Glowing Highlight effect on selected entity inside SVG */
+.erd-mermaid-root svg .glowing-highlight rect {
+  filter: drop-shadow(0 0 10px var(--primary-glow-strong)) !important;
+  stroke: var(--primary) !important;
+  stroke-width: 3px !important;
+}
+
+.erd-mermaid-root svg .glowing-highlight text.er.entityLabel {
+  fill: var(--primary) !important;
+  font-weight: 700 !important;
+}
+
+/* Detail Panel Styling */
+.erd-detail-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 440px;
+  background-color: var(--bg-card);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  box-shadow: var(--sidebar-shadow);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.erd-detail-panel.open {
+  transform: translateX(0);
+}
+
+.erd-panel-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.erd-panel-title-area h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-main);
+}
+
+.erd-panel-title-area p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.erd-panel-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erd-panel-close-btn:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-main);
+}
+
+.erd-panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-main);
+}
+
+.erd-panel-tab-btn {
+  flex: 1;
+  padding: 0.75rem 0.25rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.erd-panel-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.erd-panel-tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background-color: var(--primary-glow);
+}
+
+.erd-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+/* Table layout inside Columns panel */
+.erd-columns-search {
+  margin-bottom: 0.75rem;
+}
+
+.erd-columns-table-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.erd-columns-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.erd-columns-table th {
+  background-color: var(--bg-main);
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.erd-columns-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  color: var(--text-main);
+}
+
+.erd-columns-table tr:last-child td {
+  border-bottom: none;
+}
+
+.erd-columns-table tr:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.erd-col-name {
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.erd-col-type {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.erd-col-null {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.erd-text-req {
+  color: var(--danger);
+}
+
+.erd-text-nullable {
+  color: var(--text-muted);
+}
+
+.erd-key-badge-wrapper {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.erd-key-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erd-key-pk {
+  background-color: var(--warning);
+}
+
+.erd-key-fk {
+  background-color: #a855f7;
+}
+
+.erd-key-both {
+  background: linear-gradient(135deg, var(--warning), #a855f7);
+}
+
+/* Relations List */
+.erd-relations-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.erd-relations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.erd-relation-card {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.erd-relation-card:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-glow);
+}
+
+.erd-relation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.erd-relation-target {
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.erd-relation-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.erd-relation-type {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.4rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+/* Code Snippets tabs */
+.erd-code-wrapper {
+  background-color: #0b0f19;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.erd-code-header {
+  background-color: #111827;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.erd-code-lang {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.erd-copy-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s;
+}
+
+.erd-copy-btn:hover {
+  color: white;
+}
+
+.erd-code-block {
+  padding: 1rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* Toast alert notification style */
+.erd-toast {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background-color: var(--success);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s var(--transition-cubic);
+}
+
+.erd-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}

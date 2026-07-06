@@ -1,0 +1,183 @@
+/* Theme presets */
+:root {
+  /* Default Accent (Blue) */
+  --primary-hue: 221;
+  --primary-saturation: 83%;
+  --primary-lightness: 53%;
+  --primary: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+  --primary-hover: hsl(var(--primary-hue), var(--primary-saturation), calc(var(--primary-lightness) - 8%));
+  --primary-glow: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.15);
+  --primary-glow-strong: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.35);
+
+  /* Fonts */
+  --font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --transition-speed: 0.25s;
+  --transition-cubic: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme Variables */
+:root[data-theme="light"] {
+  --bg-main: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --text-sidebar: #0f172a;
+  --text-sidebar-muted: #64748b;
+  --border-sidebar: #e2e8f0;
+  
+  --bg-header: #ffffff;
+  --text-header: #0f172a;
+  --text-header-muted: #64748b;
+  
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+  
+  --border-color: #e2e8f0;
+  --border-focus: var(--primary);
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+
+  --scroll-thumb: #cbd5e1;
+  --scroll-track: #f1f5f9;
+  
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --sidebar-shadow: 1px 0 10px 0 rgba(0, 0, 0, 0.05);
+  
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+}
+
+/* Dark Theme Variables (Default) */
+:root[data-theme="dark"] {
+  --bg-main: #080c14;
+  --bg-sidebar: #0f1422;
+  --text-sidebar: #f1f5f9;
+  --text-sidebar-muted: #94a3b8;
+  --border-sidebar: #243049;
+  
+  --bg-header: #0f1422;
+  --text-header: #f1f5f9;
+  --text-header-muted: #94a3b8;
+  
+  --bg-card: #161e31;
+  --bg-card-hover: #212c44;
+  
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+  
+  --border-color: #243049;
+  --border-focus: var(--primary);
+  
+  --glass-bg: rgba(15, 20, 34, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+
+  --scroll-thumb: #243049;
+  --scroll-track: #080c14;
+  
+  --card-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.25);
+  --sidebar-shadow: 4px 0 24px 0 rgba(0, 0, 0, 0.3);
+  
+  --danger: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+/* Primary Color Presets */
+:root[data-preset="blue"] {
+  --primary-hue: 221;
+  --primary-saturation: 83%;
+  --primary-lightness: 53%;
+}
+
+:root[data-preset="purple"] {
+  --primary-hue: 262;
+  --primary-saturation: 83%;
+  --primary-lightness: 58%;
+}
+
+:root[data-preset="emerald"] {
+  --primary-hue: 142;
+  --primary-saturation: 72%;
+  --primary-lightness: 43%;
+}
+
+:root[data-preset="gold"] {
+  --primary-hue: 38;
+  --primary-saturation: 92%;
+  --primary-lightness: 50%;
+}
+
+/* Sidebar Custom Background Colors */
+:root[data-sidebar-bg="light"] {
+  --bg-sidebar: #ffffff;
+  --text-sidebar: #0f172a;
+  --text-sidebar-muted: #64748b;
+  --border-sidebar: #e2e8f0;
+}
+:root[data-sidebar-bg="dark"] {
+  --bg-sidebar: #0f1422;
+  --text-sidebar: #f1f5f9;
+  --text-sidebar-muted: #94a3b8;
+  --border-sidebar: #243049;
+}
+:root[data-sidebar-bg="carbon"] {
+  --bg-sidebar: #111622;
+  --text-sidebar: #f1f5f9;
+  --text-sidebar-muted: #94a3b8;
+  --border-sidebar: #243049;
+}
+:root[data-sidebar-bg="midnight"] {
+  --bg-sidebar: #05070c;
+  --text-sidebar: #f1f5f9;
+  --text-sidebar-muted: #94a3b8;
+  --border-sidebar: #111827;
+}
+:root[data-sidebar-bg="primary"] {
+  --bg-sidebar: hsl(var(--primary-hue), calc(var(--primary-saturation) - 20%), 12%);
+  --text-sidebar: #ffffff;
+  --text-sidebar-muted: rgba(255, 255, 255, 0.7);
+  --border-sidebar: rgba(255, 255, 255, 0.1);
+}
+:root[data-sidebar-bg="glass"] {
+  --bg-sidebar: rgba(15, 20, 34, 0.55);
+}
+
+/* Light Theme Sidebar Overrides for Glass */
+:root[data-theme="light"][data-sidebar-bg="glass"] {
+  --bg-sidebar: rgba(255, 255, 255, 0.6);
+}
+
+/* Header Custom Background Colors */
+:root[data-header-bg="light"] {
+  --bg-header: #ffffff;
+  --text-header: #0f172a;
+  --text-header-muted: #64748b;
+}
+:root[data-header-bg="dark"] {
+  --bg-header: #0f1422;
+  --text-header: #f1f5f9;
+  --text-header-muted: #94a3b8;
+}
+:root[data-header-bg="solid"] {
+  --bg-header: var(--bg-main);
+}
+:root[data-header-bg="primary"] {
+  --bg-header: var(--primary);
+  --text-header: var(--text-inverse);
+  --text-header-muted: rgba(255, 255, 255, 0.75);
+}
+:root[data-header-bg="glass"] {
+  --bg-header: rgba(15, 20, 34, 0.55);
+}
+
+/* Light Theme Header Overrides for Glass */
+:root[data-theme="light"][data-header-bg="glass"] {
+  --bg-header: rgba(255, 255, 255, 0.6);
+}
