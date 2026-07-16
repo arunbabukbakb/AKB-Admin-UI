@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Menu,
   ChevronLeft,
@@ -17,6 +17,8 @@ import {
   Database
 } from 'lucide-react';
 import { toggleTheme, toggleSidebar } from '../../store/themeSlice';
+import { markAsRead, markAllAsRead, clearAllNotifications } from '../../store/notificationSlice';
+
 
 const Header = ({
   sidebarCollapsed,
@@ -37,6 +39,9 @@ const Header = ({
 }) => {
   const dispatch = useDispatch();
   const isAdmin = user?.role?.name?.toLowerCase() === 'admin';
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { list: notifications, unreadCount } = useSelector((state) => state.notifications);
+
 
   return (
     <header className="navbar sticky-top" style={{ position: "sticky !important" }}>
@@ -136,10 +141,101 @@ const Header = ({
         </button>
 
         {/* Notification Badge Indicator */}
-        <button className="nav-action-btn" title="Notifications">
-          <Bell size={19} />
-          <span className="nav-badge"></span>
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button 
+            className="nav-action-btn" 
+            title="Notifications"
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowProfileMenu(false);
+            }}
+            onBlur={() => setTimeout(() => setShowNotifications(false), 200)}
+          >
+            <Bell size={19} />
+            {unreadCount > 0 && <span className="nav-badge">{unreadCount}</span>}
+          </button>
+
+          {showNotifications && (
+            <div
+              className="glass-panel fade-in"
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '48px',
+                width: '320px',
+                borderRadius: '8px',
+                padding: '0.5rem',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--card-shadow)',
+                zIndex: 1000,
+                maxHeight: '400px',
+                overflowY: 'auto'
+              }}
+            >
+              {/* Header inside notifications dropdown */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.5rem 0.5rem 0.5rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.4rem' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.825rem', color: 'var(--text-main)' }}>
+                  Notifications ({unreadCount})
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {unreadCount > 0 && (
+                    <button 
+                      onMouseDown={() => dispatch(markAllAsRead())}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                    >
+                      Read All
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button 
+                      onMouseDown={() => dispatch(clearAllNotifications())}
+                      style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Notifications list */}
+              {notifications.length === 0 ? (
+                <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  No new notifications
+                </div>
+              ) : (
+                notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    onMouseDown={() => dispatch(markAsRead(notif.id))}
+                    style={{
+                      padding: '0.6rem 0.75rem',
+                      borderBottom: '1px solid var(--border-color)',
+                      cursor: 'pointer',
+                      borderRadius: '6px',
+                      backgroundColor: notif.read ? 'transparent' : 'rgba(99, 102, 241, 0.05)',
+                      transition: 'background-color 0.2s',
+                      marginBottom: '0.2rem'
+                    }}
+                    className="notification-item-hover"
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span style={{ fontWeight: notif.read ? 500 : 700, fontSize: '0.8rem', color: notif.read ? 'var(--text-main)' : 'var(--primary)' }}>
+                        {notif.title}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        {notif.date}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', wordBreak: 'break-word', whiteSpace: 'normal', textAlign: 'left' }}>
+                      {notif.body}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
 
         {/* Profile Avatar — click toggles dropdown */}
         <div style={{ position: 'relative' }}>
@@ -259,6 +355,28 @@ const Header = ({
         .header-dropdown-item.logout:hover {
           background-color: rgba(239, 68, 68, 0.05);
           color: var(--danger) !important;
+        }
+
+        .notification-item-hover:hover {
+          background-color: var(--bg-card-hover, rgba(0,0,0,0.03)) !important;
+        }
+
+        .nav-badge {
+          position: absolute;
+          top: 3px !important;
+          right: 3px !important;
+          background-color: var(--danger) !important;
+          color: white !important;
+          border-radius: 999px !important;
+          padding: 0.1rem 0.3rem !important;
+          font-size: 0.62rem !important;
+          font-weight: 700 !important;
+          line-height: 1 !important;
+          min-width: 14px !important;
+          height: auto !important;
+          width: auto !important;
+          text-align: center !important;
+          box-shadow: 0 0 6px var(--danger) !important;
         }
       `}</style>
     </header>

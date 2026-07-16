@@ -8,6 +8,8 @@ const getBaseUrl = () => {
   return url;
 };
 
+const TOKEN_KEY = import.meta.env.VITE_TOKEN_NAME || 'auth_user';
+
 // Create a generic Axios instance
 const apiClient = axios.create({
   baseURL: getBaseUrl(),
@@ -21,7 +23,7 @@ const apiClient = axios.create({
 // Request Interceptor: Automatically inject authentication tokens if available
 apiClient.interceptors.request.use(
   (config) => {
-    const authUser = localStorage.getItem('auth_user');
+    const authUser = localStorage.getItem(TOKEN_KEY);
     if (authUser) {
       const parsed = JSON.parse(authUser);
       // If your backend token is inside the user object, extract it here
@@ -82,7 +84,7 @@ apiClient.interceptors.response.use(
       // ── Standard HTTP error handling ──────────────────────────────────────
       if (status === 401) {
         console.error('Session expired or unauthorized. Redirecting to login...');
-        localStorage.removeItem('auth_user');
+        localStorage.removeItem(TOKEN_KEY);
         window.location.href = '/login';
       } else if (status === 403) {
         console.error('Permission denied to access this resource.');

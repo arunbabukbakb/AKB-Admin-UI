@@ -3,6 +3,7 @@ import authReducer from './authSlice';
 import userReducer from './userSlice';
 import themeReducer from './themeSlice';
 import roleReducer from './roleSlice';
+import notificationReducer from './notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     users: userReducer,
     theme: themeReducer,
     roles: roleReducer,
+    notifications: notificationReducer,
   },
 });
 

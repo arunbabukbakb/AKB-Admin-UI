@@ -26,6 +26,9 @@ import {
 import { logout } from '../../store/authSlice';
 import { toggleTheme, toggleSidebar } from '../../store/themeSlice';
 import apiService from '../../services/api';
+import { requestNotificationPermission, onMessageListener } from '../../services/firebase';
+import { addNotification } from '../../store/notificationSlice';
+
 import Sidebar from './Sidebar';
 import Header from './Header';
 import './Layout.css';
@@ -250,7 +253,54 @@ const AdminLayout = ({ children }) => {
     fetchMenus();
   }, []);
 
+  // Initialize Firebase Push Notifications and listener
+  useEffect(() => {
+    const authState = localStorage.getItem(import.meta.env.VITE_TOKEN_NAME || 'auth_user');
+    let userId = null;
+    if (authState) {
+      try {
+        const parsed = JSON.parse(authState);
+        userId = parsed?.id || parsed.user?.Id;
+      } catch (e) {
+        console.warn("Failed to parse user from localStorage:", e);
+      }
+    }
+
+    if (userId) {
+      // Request permission and token
+      requestNotificationPermission(userId);
+
+      // Listen for foreground push notifications
+      const unsubscribe = onMessageListener((payload) => {
+        dispatch(
+          addNotification({
+            id: payload.messageId || Date.now().toString(),
+            title: payload.notification?.title || 'Notification',
+            body: payload.notification?.body || '',
+            date: new Date().toLocaleTimeString(),
+            read: false,
+            url: payload.data?.url || '',
+            type: payload.data?.type || ''
+          })
+        );
+
+        // Standard Web Notification alert if in foreground
+        if (Notification.permission === 'granted') {
+          new Notification(payload.notification?.title || 'New Notification', {
+            body: payload.notification?.body || '',
+            icon: '/favicon.svg'
+          });
+        }
+      });
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }
+  }, [dispatch]);
+
   // Auto-expand current active sub-menu when location or menu items change
+
   useEffect(() => {
     if (menuItems.length === 0 || sidebarCollapsed) return;
     const currentPath = location.pathname;

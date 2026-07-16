@@ -2,8 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 import apiService from 'src/services/api';
 import axios from 'axios';
 
+const TOKEN_KEY = import.meta.env.VITE_TOKEN_NAME || 'auth_user';
+
 const getInitialUser = () => {
-  const savedUser = localStorage.getItem('auth_user');
+  const savedUser = localStorage.getItem(TOKEN_KEY);
   if (savedUser) {
     try {
       const user = JSON.parse(savedUser);
@@ -40,7 +42,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload;
       state.error = null;
-      localStorage.setItem('auth_user', JSON.stringify(action.payload));
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(action.payload));
       
       // Explicitly set authorization header
       if (action.payload && action.payload.token) {
@@ -60,7 +62,7 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem('auth_user');
+      localStorage.removeItem(TOKEN_KEY);
       // Clear authorization header on logout
       axios.defaults.headers.common["Authorization"] = null;
     },
