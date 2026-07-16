@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         registerType: "autoUpdate",
         includeAssets: ["favicon.ico"],
         devOptions: {
-          enabled: true,
+          enabled: false,
         },
         manifest: {
           name: "AKB",
