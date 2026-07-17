@@ -10,6 +10,41 @@ const getBaseUrl = () => {
 
 const TOKEN_KEY = import.meta.env.VITE_TOKEN_NAME || 'auth_user';
 
+let tokenRefreshHandler = null;
+let logoutHandler = null;
+
+export const registerTokenRefreshHandler = (handler) => {
+  tokenRefreshHandler = handler;
+};
+
+export const registerLogoutHandler = (handler) => {
+  logoutHandler = handler;
+};
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+const handleSessionExpiry = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  if (logoutHandler) {
+    logoutHandler();
+  } else {
+    window.location.href = '/login';
+  }
+};
+
 // Create a generic Axios instance
 const apiClient = axios.create({
   baseURL: getBaseUrl(),
@@ -83,9 +118,88 @@ apiClient.interceptors.response.use(
 
       // ── Standard HTTP error handling ──────────────────────────────────────
       if (status === 401) {
-        console.error('Session expired or unauthorized. Redirecting to login...');
-        localStorage.removeItem(TOKEN_KEY);
-        window.location.href = '/login';
+        const originalRequest = error.config;
+
+        // Prevent infinite loop if the refresh request itself fails or has already retried
+        if (originalRequest._retry || originalRequest.url?.includes('Home/refresh')) {
+          console.error('Refresh token failed or request already retried. Logging out...');
+          handleSessionExpiry();
+          return Promise.reject(error);
+        }
+
+        const authUser = localStorage.getItem(TOKEN_KEY);
+        if (!authUser) {
+          handleSessionExpiry();
+          return Promise.reject(error);
+        }
+
+        const parsed = JSON.parse(authUser);
+        const refreshToken = parsed?.refreshToken;
+
+        if (!refreshToken) {
+          handleSessionExpiry();
+          return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              originalRequest.headers['Authorization'] = `Bearer ${token}`;
+              return apiClient(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        return new Promise((resolve, reject) => {
+          axios.post(getBaseUrl() + 'Home/refresh', {
+            accessToken: parsed.token,
+            refreshToken: refreshToken
+          })
+          .then((res) => {
+            const apiResult = res.data;
+            if (apiResult && apiResult.status && apiResult.data) {
+              const newTokens = apiResult.data;
+              const newAccessToken = newTokens.token;
+              const newRefreshToken = newTokens.refreshToken;
+
+              // Update local storage
+              parsed.token = newAccessToken;
+              parsed.refreshToken = newRefreshToken;
+              localStorage.setItem(TOKEN_KEY, JSON.stringify(parsed));
+
+              // Update default headers
+              apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+
+              // Notify Redux store
+              if (tokenRefreshHandler) {
+                tokenRefreshHandler({ token: newAccessToken, refreshToken: newRefreshToken });
+              }
+
+              processQueue(null, newAccessToken);
+
+              // Replay the original request
+              originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+              resolve(apiClient(originalRequest));
+            } else {
+              throw new Error(apiResult?.message || 'Token refresh failed');
+            }
+          })
+          .catch((err) => {
+            processQueue(err, null);
+            handleSessionExpiry();
+            reject(err);
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+        });
       } else if (status === 403) {
         console.error('Permission denied to access this resource.');
       } else if (status >= 500) {

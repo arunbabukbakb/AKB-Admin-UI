@@ -87,10 +87,15 @@ const authSlice = createSlice({
     },
     updateToken: (state, action) => {
       if (state.user) {
-        state.user.token = action.payload;
+        if (typeof action.payload === 'string') {
+          state.user.token = action.payload;
+        } else if (action.payload && typeof action.payload === 'object') {
+          state.user.token = action.payload.token || state.user.token;
+          state.user.refreshToken = action.payload.refreshToken || state.user.refreshToken;
+        }
         localStorage.setItem(TOKEN_KEY, JSON.stringify(state.user));
         // Explicitly set authorization header for axios common headers
-        axios.defaults.headers.common["Authorization"] = `Bearer ${action.payload}`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${state.user.token}`;
       }
     }
   }
@@ -123,6 +128,7 @@ export const loginUser = (credentials) => async (dispatch) => {
         email: 'admin@admin.com',
         role: 'admin',
         token: 'mock_token_123',
+        refreshToken: 'mock_refresh_token_123',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
       };
       dispatch(loginSuccess(user));
@@ -138,12 +144,13 @@ export const loginUser = (credentials) => async (dispatch) => {
     if (response && response.data) {
       const loginData = response.data;
 
-      // API returns { token, logo, customer, user: { id, userName, ... } }
+      // API returns { token, refreshToken, logo, customer, user: { id, userName, ... } }
       // Flatten into one object so state.auth.user has all fields at the top level:
-      // → user?.id, user?.userName, user?.token, user?.logo all work directly
+      // → user?.id, user?.userName, user?.token, user?.refreshToken, user?.logo all work directly
       const userInfo = {
         ...(loginData.user || {}),   // spread actual user fields (id, userName, nickName, roleId, roleName, ...)
         token:    loginData.token    || loginData.user?.token,
+        refreshToken: loginData.refreshToken || loginData.user?.refreshToken,
         logo:     loginData.logo,
         customer: loginData.customer,
       };

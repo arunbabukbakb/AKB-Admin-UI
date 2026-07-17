@@ -76,9 +76,9 @@ const Header = ({
 
                 try {
                   const response = await apiService.post('Home/regenerate-token', { branchId: parseInt(newBranchId) });
-                  const newToken = typeof response === 'string' ? response : (response?.token || response?.data?.token || response?.data);
-                  if (newToken) {
-                    dispatch(updateToken(newToken));
+                  const tokenData = response?.data;
+                  if (tokenData && tokenData.token) {
+                    dispatch(updateToken({ token: tokenData.token, refreshToken: tokenData.refreshToken }));
                     console.log('Token successfully regenerated and updated for branch:', newBranchId);
                   }
                 } catch (err) {
