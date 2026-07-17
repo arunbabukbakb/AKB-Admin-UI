@@ -91,6 +91,72 @@ const getUserPhotoUrl = (rawPhoto, nickName, userName) => {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(nickName || userName || 'U')}&background=6366f1&color=fff&size=64`;
 };
 
+// IndexedDB setup for syncing offline/background notifications
+const DB_NAME = 'fcm_notifications_db';
+const DB_VERSION = 2;
+const STORE_NAME = 'notifications';
+
+const openDB = () => {
+  console.log('[FCM UI] Opening IndexedDB:', DB_NAME, 'version:', DB_VERSION);
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => {
+      console.error('[FCM UI] IndexedDB open error:', request.error);
+      reject(request.error);
+    };
+    request.onsuccess = () => {
+      console.log('[FCM UI] IndexedDB opened successfully');
+      resolve(request.result);
+    };
+    request.onupgradeneeded = (event) => {
+      console.log('[FCM UI] IndexedDB upgrade needed');
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        console.log('[FCM UI] Creating object store:', STORE_NAME);
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
+};
+
+const getNotificationsFromDB = () => {
+  console.log('[FCM UI] Getting notifications from IndexedDB');
+  return openDB().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.getAll();
+      request.onsuccess = () => {
+        console.log('[FCM UI] Successfully fetched notifications from DB:', request.result);
+        resolve(request.result);
+      };
+      request.onerror = () => {
+        console.error('[FCM UI] Failed to get notifications:', request.error);
+        reject(request.error);
+      };
+    });
+  });
+};
+
+const clearNotificationsFromDB = () => {
+  console.log('[FCM UI] Clearing notifications from IndexedDB');
+  return openDB().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.clear();
+      request.onsuccess = () => {
+        console.log('[FCM UI] Successfully cleared notifications from DB');
+        resolve();
+      };
+      request.onerror = () => {
+        console.error('[FCM UI] Failed to clear notifications from DB:', request.error);
+        reject(request.error);
+      };
+    });
+  });
+};
+
 const AdminLayout = ({ children }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -105,7 +171,7 @@ const AdminLayout = ({ children }) => {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showMobileInstallBanner, setShowMobileInstallBanner] = useState(true);
 
-  const { user } = useSelector((state) => state.auth?.user);
+  const { user } = useSelector((state) => state.auth);
   const { theme, sidebarCollapsed } = useSelector((state) => state.theme);
 
   const handleLogout = () => {
@@ -299,6 +365,61 @@ const AdminLayout = ({ children }) => {
     }
   }, [dispatch]);
 
+  // Handle syncing background notifications from IndexedDB and real-time BroadcastChannel listening
+  useEffect(() => {
+    const syncOfflineNotifications = async () => {
+      console.log('[FCM UI] Running syncOfflineNotifications...');
+      try {
+        const offlineNotifs = await getNotificationsFromDB();
+        if (offlineNotifs && offlineNotifs.length > 0) {
+          console.log('[FCM UI] Found offline/background notifications to sync:', offlineNotifs);
+          offlineNotifs.forEach((notif) => {
+            dispatch(addNotification(notif));
+          });
+          await clearNotificationsFromDB();
+        } else {
+          console.log('[FCM UI] No offline/background notifications found in IndexedDB');
+        }
+      } catch (err) {
+        console.error('[FCM UI] Error syncing background notifications from IndexedDB:', err);
+      }
+    };
+
+    // Sync on mount
+    syncOfflineNotifications();
+
+    // Listen for real-time broadcasts from service worker when tab is in background/inactive
+    console.log('[FCM UI] Subscribing to BroadcastChannel: fcm_notifications');
+    const channel = new BroadcastChannel('fcm_notifications');
+    channel.onmessage = (event) => {
+      console.log('[FCM UI] Broadcast message received:', event.data);
+      if (event.data && event.data.type === 'BACKGROUND_NOTIFICATION') {
+        console.log('[FCM UI] Dispatching background notification to Redux:', event.data.payload);
+        dispatch(addNotification(event.data.payload));
+        // Clear IndexedDB since the active client has consumed it
+        clearNotificationsFromDB().catch((err) => {
+          console.error('[FCM UI] Error clearing processed notifications from IndexedDB:', err);
+        });
+      }
+    };
+
+    // Re-sync on focus/visibility change
+    const handleVisibilityChange = () => {
+      console.log('[FCM UI] Visibility changed to:', document.visibilityState);
+      if (document.visibilityState === 'visible') {
+        syncOfflineNotifications();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      console.log('[FCM UI] Unsubscribing from BroadcastChannel and visibility listener');
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      channel.close();
+    };
+  }, [dispatch]);
+
   // Auto-expand current active sub-menu when location or menu items change
 
   useEffect(() => {
@@ -437,13 +558,13 @@ const AdminLayout = ({ children }) => {
         .sidebar-sublink {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 0.5rem 1rem 0.5rem 2.5rem;
+          gap: 10px;
+          padding: 0.35rem 0.75rem 0.35rem 2rem;
           color: var(--text-muted);
           text-decoration: none;
-          font-size: 0.85rem;
-          border-radius: 8px;
-          margin: 2px 8px;
+          font-size: 0.78rem;
+          border-radius: 6px;
+          margin: 1px 6px;
           transition: all 0.2s ease;
         }
         .sidebar-sublink-bullet {
@@ -494,7 +615,7 @@ const AdminLayout = ({ children }) => {
           .sidebar.collapsed .sidebar-dropdown:hover .sidebar-submenu-list,
           .sidebar.collapsed .sidebar-dropdown.open .sidebar-submenu-list {
             position: absolute;
-            left: 72px;
+            left: 56px;
             top: 0;
             width: 200px;
             background-color: var(--bg-sidebar);

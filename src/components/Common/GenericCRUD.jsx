@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Plus, Search, Edit, Trash2, X, AlertCircle, CheckCircle, Loader, RotateCw } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { Modal } from 'react-bootstrap';
 import apiService from '../../services/api';
 import '../../pages/Pages.css';
@@ -18,25 +18,23 @@ const GenericCRUD = ({
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Search & Modal states
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [dynamicOptions, setDynamicOptions] = useState({});
-  const [toast, setToast] = useState(null); // { message: '', type: 'success' | 'danger' }
-
   const showToastNotification = (message, type = 'success') => {
-    setToast({ message, type });
-    // Auto dismiss after 4 seconds
-    setTimeout(() => {
-      setToast((prev) => (prev && prev.message === message ? null : prev));
-    }, 4000);
+    if (type === 'success') {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
   };
 
   const cacheKey = `crud_cache_${apiUrl}`;
@@ -65,7 +63,7 @@ const GenericCRUD = ({
     setError(null);
     try {
       const data = await apiService.get(apiUrl);
-      
+
       // Resilient array parsing
       let parsedList = [];
       if (Array.isArray(data)) {
@@ -76,7 +74,7 @@ const GenericCRUD = ({
         const foundArray = Object.values(data).find(val => Array.isArray(val));
         if (foundArray) parsedList = foundArray;
       }
-      
+
       setList(parsedList);
       saveFallbackData(parsedList);
     } catch (err) {
@@ -101,7 +99,7 @@ const GenericCRUD = ({
       if (f.optionsUrl) {
         try {
           const data = await apiService.get(f.optionsUrl);
-          
+
           let parsedList = [];
           if (Array.isArray(data)) {
             parsedList = data;
@@ -141,7 +139,7 @@ const GenericCRUD = ({
   // Resolve options list dynamically (static array, local list filter, or endpoint data)
   const getFieldOptions = (f) => {
     if (f.options) return f.options;
-    
+
     if (f.optionsFromSelf) {
       const selfMapped = list
         .filter(item => {
@@ -152,13 +150,13 @@ const GenericCRUD = ({
           value: item[f.selfValue || 'id'].toString(),
           label: item[f.selfLabel || 'name']
         }));
-      
+
       if (f.noneOption) {
         return [f.noneOption, ...selfMapped];
       }
       return selfMapped;
     }
-    
+
     return dynamicOptions[f.name] || [];
   };
 
@@ -265,7 +263,7 @@ const GenericCRUD = ({
       }
     } catch (err) {
       console.warn(`Generic API Post failed, executing local fallback:`, err.message);
-      
+
       const response = err.response?.data;
       if (response && 'systemMessage' in response) {
         console.log('System error details:', response.systemMessage);
@@ -321,7 +319,7 @@ const GenericCRUD = ({
       setSelectedItem(null);
     } catch (err) {
       console.warn(`Generic API Delete failed, removing local fallback:`, err.message);
-      
+
       const response = err.response?.data;
       if (response && 'systemMessage' in response) {
         console.log('System error details:', response.systemMessage);
@@ -378,9 +376,9 @@ const GenericCRUD = ({
           />
         </div>
         <div className="toolbar-actions" style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-          <button 
+          <button
             type="button"
-            className="btn btn-secondary" 
+            className="btn btn-secondary"
             onClick={loadItems}
             disabled={loading}
             title="Reload Data"
@@ -504,7 +502,7 @@ const GenericCRUD = ({
                 <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary)' }}>
                   Record #{index + 1}
                 </span>
-                
+
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
@@ -547,7 +545,7 @@ const GenericCRUD = ({
                 {columns.map((col) => {
                   // Skip index/serial column on card because we display Record #index+1
                   if (col.key === 'serialNumber' || col.key === 'sno') return null;
-                  
+
                   return (
                     <div key={col.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', fontSize: '0.825rem' }}>
                       <span style={{ fontWeight: '500', color: 'var(--text-muted)', fontSize: '0.775rem', flexShrink: 0 }}>
@@ -582,7 +580,7 @@ const GenericCRUD = ({
         <Modal.Header closeButton style={{ padding: '0.75rem 1.25rem' }}>
           <Modal.Title style={{ fontSize: '1.1rem', fontWeight: 600 }}>Add {title}</Modal.Title>
         </Modal.Header>
-        
+
         <form onSubmit={(e) => handleSubmit(e, false)} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
           <Modal.Body style={{ padding: '1rem 1.25rem', overflowY: 'auto' }}>
             {errorMsg && (
@@ -591,16 +589,16 @@ const GenericCRUD = ({
                 <span>{errorMsg}</span>
               </div>
             )}
-            
+
             <div className="modal-form-grid">
               {fields.map((f) => (
-                <div 
-                  className="form-group" 
+                <div
+                  className="form-group"
                   key={f.name}
                   style={{ gridColumn: `span ${f.gridSize || 12}` }}
                 >
                   <label className="form-label" htmlFor={`add-${f.name}`}>{f.label}</label>
-                  
+
                   {f.type === 'boolean' || f.dataType === 'boolean' || f.type === 'checkbox' ? (
                     <div style={{ display: 'flex', alignItems: 'center', height: '34px' }}>
                       <input
@@ -655,9 +653,9 @@ const GenericCRUD = ({
                         <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Uploaded</span>
                           {formData[f.name].toString().startsWith('data:image') && (
-                            <img 
-                              src={formData[f.name]} 
-                              alt="preview" 
+                            <img
+                              src={formData[f.name]}
+                              alt="preview"
                               style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
                             />
                           )}
@@ -704,7 +702,7 @@ const GenericCRUD = ({
         <Modal.Header closeButton style={{ padding: '0.75rem 1.25rem' }}>
           <Modal.Title style={{ fontSize: '1.1rem', fontWeight: 600 }}>Edit {title} Details</Modal.Title>
         </Modal.Header>
-        
+
         <form onSubmit={(e) => handleSubmit(e, true)} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
           <Modal.Body style={{ padding: '1rem 1.25rem', overflowY: 'auto' }}>
             {errorMsg && (
@@ -713,16 +711,16 @@ const GenericCRUD = ({
                 <span>{errorMsg}</span>
               </div>
             )}
-            
+
             <div className="modal-form-grid">
               {fields.map((f) => (
-                <div 
-                  className="form-group" 
+                <div
+                  className="form-group"
                   key={f.name}
                   style={{ gridColumn: `span ${f.gridSize || 12}` }}
                 >
                   <label className="form-label" htmlFor={`edit-${f.name}`}>{f.label}</label>
-                  
+
                   {f.type === 'boolean' || f.dataType === 'boolean' || f.type === 'checkbox' ? (
                     <div style={{ display: 'flex', alignItems: 'center', height: '34px' }}>
                       <input
@@ -775,9 +773,9 @@ const GenericCRUD = ({
                         <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Uploaded</span>
                           {formData[f.name].toString().startsWith('data:image') && (
-                            <img 
-                              src={formData[f.name]} 
-                              alt="preview" 
+                            <img
+                              src={formData[f.name]}
+                              alt="preview"
                               style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
                             />
                           )}
@@ -988,60 +986,7 @@ const GenericCRUD = ({
         }
       `}</style>
 
-      {/* Toast Popup Notification */}
-      {toast && createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 999999,
-            minWidth: '300px',
-            maxWidth: '450px',
-            padding: '1rem',
-            borderRadius: '10px',
-            backgroundColor: 'var(--bg-card)',
-            border: `1px solid ${toast.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            animation: 'slideIn 0.3s ease forwards',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
-          }}
-        >
-          {toast.type === 'success' ? (
-            <CheckCircle size={20} style={{ color: 'var(--success, #22c55e)', flexShrink: 0 }} />
-          ) : (
-            <AlertCircle size={20} style={{ color: 'var(--danger, #ef4444)', flexShrink: 0 }} />
-          )}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-              {toast.type === 'success' ? 'Success' : 'Error'}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
-              {toast.message}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToast(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              padding: '0.2rem',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <X size={16} />
-          </button>
-        </div>,
-        document.body
-      )}
+
     </div>
   );
 };

@@ -84,6 +84,14 @@ const authSlice = createSlice({
     },
     clearRegisterMessage: (state) => {
       state.registerMessage = null;
+    },
+    updateToken: (state, action) => {
+      if (state.user) {
+        state.user.token = action.payload;
+        localStorage.setItem(TOKEN_KEY, JSON.stringify(state.user));
+        // Explicitly set authorization header for axios common headers
+        axios.defaults.headers.common["Authorization"] = `Bearer ${action.payload}`;
+      }
     }
   }
 });
@@ -97,7 +105,8 @@ export const {
   registerSuccess,
   registerFailure,
   clearError,
-  clearRegisterMessage
+  clearRegisterMessage,
+  updateToken
 } = authSlice.actions;
 
 // Async real API auth actions

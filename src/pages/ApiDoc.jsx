@@ -8,7 +8,7 @@ import {
 import './Pages.css';
 
 const ApiDoc = () => {
-  const { user } = useSelector((state) => state.auth?.user || {});
+  const { user } = useSelector((state) => state.auth || {});
   const isAdmin = user?.role?.name?.toLowerCase() === 'admin';
 
   const [activeTab, setActiveTab] = useState('auth');

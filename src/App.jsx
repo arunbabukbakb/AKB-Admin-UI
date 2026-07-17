@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { publicRoutes, protectedRoutes } from './routes/routes';
 import AdminLayout from './components/Layout/AdminLayout';
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './theme.css';
 
 // Authentication Guard Component
@@ -31,34 +33,45 @@ function App() {
   }, [theme, preset, sidebarBg, headerBg]);
 
   return (
-    <Routes>
-      {/* Public Auth Routes */}
-      {publicRoutes.map((route) => (
-        <Route 
-          key={route.path} 
-          path={route.path} 
-          element={route.element} 
-        />
-      ))}
+    <>
+      <Routes>
+        {/* Public Auth Routes */}
+        {publicRoutes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
 
-      {/* Protected Admin Console Routes wrapped with Sidebar layouts */}
-      {protectedRoutes.map((route) => (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={
-            <ProtectedRoute>
-              <AdminLayout>
-                {route.element}
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-      ))}
+        {/* Protected Admin Console Routes wrapped with Sidebar layouts */}
+        {protectedRoutes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  {route.element}
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+        ))}
 
-      {/* Fallback Redirection */}
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
-    </Routes>
+        {/* Fallback Redirection */}
+        <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+      </Routes>
+      <ToastContainer
+        theme={theme}
+        position="top-right"
+        autoClose={3000}
+        transition={Slide}
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
+    </>
   );
 }
 

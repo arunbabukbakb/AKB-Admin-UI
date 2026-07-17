@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Menu,
@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { toggleTheme, toggleSidebar } from '../../store/themeSlice';
 import { markAsRead, markAllAsRead, clearAllNotifications } from '../../store/notificationSlice';
+import apiService from '../../services/api';
+import { updateToken } from '../../store/authSlice';
 
 
 const Header = ({
@@ -38,6 +40,7 @@ const Header = ({
   handleInstallClick
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const isAdmin = user?.role?.name?.toLowerCase() === 'admin';
   const [showNotifications, setShowNotifications] = useState(false);
   const { list: notifications, unreadCount } = useSelector((state) => state.notifications);
@@ -51,14 +54,14 @@ const Header = ({
           style={{ display: 'none' }}
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          <Menu size={20} />
+          <Menu size={18} />
         </button>
         <button
           className="nav-action-btn desktop-toggle-btn"
           onClick={() => dispatch(toggleSidebar())}
           title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
-          {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
 
         {/* Branch Selector Dropdown */}
@@ -66,18 +69,30 @@ const Header = ({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <select
               value={activeBranchId}
-              onChange={(e) => {
+              onChange={async (e) => {
                 const newBranchId = e.target.value;
                 setActiveBranchId(newBranchId);
                 localStorage.setItem('active_branch_id', newBranchId);
+
+                try {
+                  const response = await apiService.post('Home/regenerate-token', { branchId: parseInt(newBranchId) });
+                  const newToken = typeof response === 'string' ? response : (response?.token || response?.data?.token || response?.data);
+                  if (newToken) {
+                    dispatch(updateToken(newToken));
+                    console.log('Token successfully regenerated and updated for branch:', newBranchId);
+                  }
+                } catch (err) {
+                  console.error('Failed to regenerate token for branch:', newBranchId, err);
+                }
+
                 window.dispatchEvent(new CustomEvent('activeBranchChanged', { detail: newBranchId }));
               }}
               style={{
-                height: '32px',
-                padding: '0.25rem 2.5rem 0.25rem 0.75rem',
-                fontSize: '0.8rem',
+                height: '28px',
+                padding: '0.15rem 2rem 0.15rem 0.6rem',
+                fontSize: '0.75rem',
                 fontWeight: '600',
-                borderRadius: '6px',
+                borderRadius: '5px',
                 backgroundColor: 'var(--bg-main)',
                 border: '1px solid var(--border-color)',
                 color: 'var(--text-main)',
@@ -116,11 +131,11 @@ const Header = ({
             className="btn btn-primary d-none d-md-flex align-items-center gap-2"
             onClick={handleInstallClick}
             style={{
-              height: '32px',
-              padding: '0 0.85rem',
-              fontSize: '0.78rem',
+              height: '28px',
+              padding: '0 0.65rem',
+              fontSize: '0.75rem',
               fontWeight: '600',
-              borderRadius: '6px',
+              borderRadius: '5px',
               border: 'none',
               cursor: 'pointer',
               boxShadow: 'var(--primary-glow-strong)'
@@ -137,13 +152,13 @@ const Header = ({
           onClick={() => dispatch(toggleTheme())}
           title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
-          {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+          {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
         {/* Notification Badge Indicator */}
         <div style={{ position: 'relative' }}>
-          <button 
-            className="nav-action-btn" 
+          <button
+            className="nav-action-btn"
             title="Notifications"
             onClick={() => {
               setShowNotifications(!showNotifications);
@@ -151,17 +166,17 @@ const Header = ({
             }}
             onBlur={() => setTimeout(() => setShowNotifications(false), 200)}
           >
-            <Bell size={19} />
+            <Bell size={17} />
             {unreadCount > 0 && <span className="nav-badge">{unreadCount}</span>}
           </button>
 
           {showNotifications && (
             <div
-              className="glass-panel fade-in"
+              className="fade-in notifications-dropdown"
               style={{
                 position: 'absolute',
                 right: 0,
-                top: '48px',
+                top: '38px',
                 width: '320px',
                 borderRadius: '8px',
                 padding: '0.5rem',
@@ -169,7 +184,8 @@ const Header = ({
                 boxShadow: 'var(--card-shadow)',
                 zIndex: 1000,
                 maxHeight: '400px',
-                overflowY: 'auto'
+                overflowY: 'auto',
+                background: 'var(--bg-card)'
               }}
             >
               {/* Header inside notifications dropdown */}
@@ -179,7 +195,7 @@ const Header = ({
                 </span>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   {unreadCount > 0 && (
-                    <button 
+                    <button
                       onMouseDown={() => dispatch(markAllAsRead())}
                       style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
                     >
@@ -187,7 +203,7 @@ const Header = ({
                     </button>
                   )}
                   {notifications.length > 0 && (
-                    <button 
+                    <button
                       onMouseDown={() => dispatch(clearAllNotifications())}
                       style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
                     >
@@ -206,7 +222,12 @@ const Header = ({
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
-                    onMouseDown={() => dispatch(markAsRead(notif.id))}
+                    onMouseDown={() => {
+                      dispatch(markAsRead(notif.id));
+                      if (notif.url) {
+                        navigate(notif.url);
+                      }
+                    }}
                     style={{
                       padding: '0.6rem 0.75rem',
                       borderBottom: '1px solid var(--border-color)',
@@ -254,17 +275,18 @@ const Header = ({
 
           {showProfileMenu && (
             <div
-              className="glass-panel fade-in"
+              className="fade-in"
               style={{
                 position: 'absolute',
                 right: 0,
-                top: '48px',
+                top: '38px',
                 width: '190px',
                 borderRadius: '8px',
                 padding: '0.5rem',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--card-shadow)',
-                zIndex: 1000
+                zIndex: 1000,
+                background: 'var(--bg-card)'
               }}
             >
               {/* User info header inside dropdown */}
@@ -377,6 +399,18 @@ const Header = ({
           width: auto !important;
           text-align: center !important;
           box-shadow: 0 0 6px var(--danger) !important;
+        }
+
+        @media (max-width: 576px) {
+          .notifications-dropdown {
+            position: fixed !important;
+            right: 12px !important;
+            left: 12px !important;
+            top: 56px !important;
+            width: auto !important;
+            max-width: calc(100vw - 24px) !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+          }
         }
       `}</style>
     </header>

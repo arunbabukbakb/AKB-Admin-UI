@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Sun, Moon, ShieldAlert, Palette, Check } from 'lucide-react';
+import { Sun, Moon, Palette, Check } from 'lucide-react';
 import { setTheme, setPreset, setSidebarBg, setHeaderBg, resetTheme } from '../store/themeSlice';
 import './Pages.css';
 
@@ -8,8 +8,6 @@ import './Pages.css';
 const Settings = () => {
   const dispatch = useDispatch();
   const { theme, preset, sidebarBg, headerBg } = useSelector((state) => state.theme);
-  const { user } = useSelector((state) => state.auth);
-
   const presets = [
     { id: 'blue', name: 'cyber blue', colorClass: 'blue' },
     { id: 'purple', name: 'electric violet', colorClass: 'purple' },
@@ -146,40 +144,7 @@ const Settings = () => {
         </div>
       </section>
 
-      {/* Account Info Profile Block */}
-      {user && (
-        <section className="settings-section">
-          <h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-              <ShieldAlert size={20} style={{ color: 'var(--primary)' }} />
-              <span>Admin Profile Info</span>
-            </div>
-          </h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            Review registered credentials for your administrative session.
-          </p>
 
-          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <img 
-              src={user.avatar} 
-              alt={user.name} 
-              style={{ width: '80px', height: '80px', borderRadius: '50%', border: '3px solid var(--primary)', objectFit: 'cover' }}
-            />
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0, fontSize: '1.35rem' }}>{user.name}</h3>
-                <span className={`status-badge ${user.role}`} style={{ verticalAlign: 'middle' }}>{user.role}</span>
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-                Email: <strong>{user.email}</strong>
-              </p>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                Active Session Token ID: <code style={{ backgroundColor: 'var(--bg-main)', padding: '0.15rem 0.35rem', borderRadius: '4px' }}>session_mock_{user.id}</code>
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 };

@@ -245,7 +245,7 @@ erDiagram
 `;
 
 const SchemaErd = () => {
-  const { user } = useSelector((state) => state.auth?.user || {});
+  const { user } = useSelector((state) => state.auth || {});
   const { theme } = useSelector((state) => state.theme || {});
   const isAdmin = user?.role?.name?.toLowerCase() === 'admin';
 

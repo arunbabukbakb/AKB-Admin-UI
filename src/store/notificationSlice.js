@@ -26,6 +26,9 @@ const notificationSlice = createSlice({
   reducers: {
     addNotification: (state, action) => {
       // Expecting payload: { id, title, body, date, read: false, url, type }
+      const exists = state.list.some(n => n.id === action.payload.id);
+      if (exists) return;
+
       state.list.unshift(action.payload);
       state.unreadCount = state.list.filter(n => !n.read).length;
       saveNotifications(state.list);

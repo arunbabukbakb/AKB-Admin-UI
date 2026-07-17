@@ -95,7 +95,7 @@ const AlertBox = ({ type, message }) => {
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth?.user);
+  const { user } = useSelector((state) => state.auth);
 
   // ── Section 1: Photo & Sign ──────────────────────────────────────────────
   const [photoFile, setPhotoFile] = useState(null);

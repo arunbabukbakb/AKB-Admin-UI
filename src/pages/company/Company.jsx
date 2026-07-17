@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Building, Upload, Save, RotateCw, AlertCircle, CheckCircle, Loader, Globe, MapPin, Mail, Phone, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import apiService from '../../services/api';
 
 const Company = () => {
@@ -29,13 +29,12 @@ const Company = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [toast, setToast] = useState(null);
-
   const showToastNotification = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast((prev) => (prev && prev.message === message ? null : prev));
-    }, 4000);
+    if (type === 'success') {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
   };
 
   const loadCompany = async () => {
@@ -73,7 +72,7 @@ const Company = () => {
         };
         setFormData(mapped);
         localStorage.setItem('company_profile', JSON.stringify(mapped));
-        
+
         const rawLogo = companyObj.logoFile || companyObj.logo;
         if (rawLogo) {
           if (rawLogo.startsWith('http://') || rawLogo.startsWith('https://') || rawLogo.startsWith('data:')) {
@@ -131,7 +130,7 @@ const Company = () => {
       }
 
       showToastNotification(response.message || 'Company details saved successfully!', 'success');
-      
+
       // Reload company profile to fetch updated values
       await loadCompany();
     } catch (err) {
@@ -236,7 +235,7 @@ const Company = () => {
               <h3 style={{ fontSize: '0.975rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
                 Profile Details
               </h3>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="row g-3">
                   <div className="col-md-4">
@@ -252,7 +251,7 @@ const Company = () => {
                       style={{ padding: '0.45rem 0.6rem', fontSize: '0.825rem', borderRadius: '6px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
                     />
                   </div>
-                  
+
                   <div className="col-md-8">
                     <label className="form-label" style={{ fontSize: '0.775rem', color: 'var(--text-main)', fontWeight: 500 }}>Company Name</label>
                     <input
@@ -595,60 +594,7 @@ const Company = () => {
         </div>
       )}
 
-      {/* Toast Popup Notification */}
-      {toast && createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 999999,
-            minWidth: '300px',
-            maxWidth: '450px',
-            padding: '1rem',
-            borderRadius: '10px',
-            backgroundColor: 'var(--bg-card)',
-            border: `1px solid ${toast.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            animation: 'slideIn 0.3s ease forwards',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
-          }}
-        >
-          {toast.type === 'success' ? (
-            <CheckCircle size={20} style={{ color: 'var(--success, #22c55e)', flexShrink: 0 }} />
-          ) : (
-            <AlertCircle size={20} style={{ color: 'var(--danger, #ef4444)', flexShrink: 0 }} />
-          )}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-              {toast.type === 'success' ? 'Success' : 'Error'}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
-              {toast.message}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToast(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              padding: '0.2rem',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <X size={16} />
-          </button>
-        </div>,
-        document.body
-      )}
+
 
       <style>{`
         .form-check-input {

@@ -20,7 +20,8 @@ const Sidebar = ({
   const dispatch = useDispatch();
 
   return (
-    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
+    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
+      style={{ background: 'var(--bg-card)' }}>
       <div className="sidebar-header">
         <Link to="/dashboard" className="sidebar-brand" onClick={() => setMobileOpen(false)}>
           <Palette size={26} />
@@ -53,8 +54,8 @@ const Sidebar = ({
                       cursor: 'pointer'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <MenuIcon size={20} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <MenuIcon size={18} />
                       <span className="sidebar-link-text">{item.title}</span>
                     </div>
                     {!sidebarCollapsed && (
@@ -63,7 +64,7 @@ const Sidebar = ({
                   </button>
 
                   {/* Collapsible Children lists */}
-                  <ul className={`sidebar-submenu-list ${isExpanded ? 'visible' : 'collapsed'}`}>
+                  <ul className={`sidebar-submenu-list ${isExpanded ? 'visible' : 'collapsed'}`} style={{ background: 'var(--bg-card)' }}>
                     {item.children.map((child) => (
                       <li key={child.menuId}>
                         <NavLink
@@ -96,7 +97,7 @@ const Sidebar = ({
                   }}
                   title={sidebarCollapsed ? item.title : undefined}
                 >
-                  <MenuIcon size={20} />
+                  <MenuIcon size={18} />
                   <span className="sidebar-link-text">{item.title}</span>
                 </NavLink>
               </li>
