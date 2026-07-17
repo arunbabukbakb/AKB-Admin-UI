@@ -588,3 +588,21 @@
     font-size: 0.7rem !important;
   }
 }
+
+/* Light mode specific background colors for dashboard top 4 tiles */
+[data-theme="light"] .kpi-card.total-users {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  border-color: #bfdbfe !important;
+}
+[data-theme="light"] .kpi-card.active-users {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  border-color: #bbf7d0 !important;
+}
+[data-theme="light"] .kpi-card.inactive-users {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  border-color: #fde68a !important;
+}
+[data-theme="light"] .kpi-card.admin-users {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+  border-color: #e9d5ff !important;
+}

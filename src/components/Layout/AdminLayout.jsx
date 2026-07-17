@@ -560,7 +560,7 @@ const AdminLayout = ({ children }) => {
           align-items: center;
           gap: 10px;
           padding: 0.35rem 0.75rem 0.35rem 2rem;
-          color: var(--text-muted);
+          color: var(--text-sidebar-muted);
           text-decoration: none;
           font-size: 0.78rem;
           border-radius: 6px;
@@ -571,20 +571,20 @@ const AdminLayout = ({ children }) => {
           width: 5px;
           height: 5px;
           border-radius: 50%;
-          background-color: var(--text-muted);
+          background-color: var(--text-sidebar-muted);
           opacity: 0.5;
           transition: all 0.2s ease;
         }
         .sidebar-sublink:hover {
-          background-color: var(--bg-hover);
-          color: var(--text-main);
+          background-color: var(--bg-sidebar-hover);
+          color: var(--text-sidebar);
         }
         .sidebar-sublink:hover .sidebar-sublink-bullet {
           background-color: var(--primary);
           opacity: 1;
         }
         .sidebar-sublink.active {
-          background-color: var(--primary-glow);
+          background-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.20);
           color: var(--primary);
           font-weight: 500;
         }

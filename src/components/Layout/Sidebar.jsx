@@ -20,12 +20,11 @@ const Sidebar = ({
   const dispatch = useDispatch();
 
   return (
-    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
-      style={{ background: 'var(--bg-card)' }}>
+    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-header">
         <Link to="/dashboard" className="sidebar-brand" onClick={() => setMobileOpen(false)}>
           <Palette size={26} />
-          <span className="sidebar-brand-text">AuraAdmin</span>
+          <span className="sidebar-brand-text">AkbAdmin</span>
         </Link>
       </div>
 
@@ -64,7 +63,7 @@ const Sidebar = ({
                   </button>
 
                   {/* Collapsible Children lists */}
-                  <ul className={`sidebar-submenu-list ${isExpanded ? 'visible' : 'collapsed'}`} style={{ background: 'var(--bg-card)' }}>
+                  <ul className={`sidebar-submenu-list ${isExpanded ? 'visible' : 'collapsed'}`}>
                     {item.children.map((child) => (
                       <li key={child.menuId}>
                         <NavLink

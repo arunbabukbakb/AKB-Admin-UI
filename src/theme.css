@@ -22,6 +22,7 @@
   --text-sidebar: #0f172a;
   --text-sidebar-muted: #64748b;
   --border-sidebar: #e2e8f0;
+  --bg-sidebar-hover: #f1f5f9;
   
   --bg-header: #ffffff;
   --text-header: #0f172a;
@@ -35,6 +36,7 @@
   --text-inverse: #ffffff;
   
   --border-color: #e2e8f0;
+  --input-border-color: #94a3b8;
   --border-focus: var(--primary);
   
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -59,6 +61,7 @@
   --text-sidebar: #f1f5f9;
   --text-sidebar-muted: #94a3b8;
   --border-sidebar: #243049;
+  --bg-sidebar-hover: #1b2234;
   
   --bg-header: #0f1422;
   --text-header: #f1f5f9;
@@ -72,6 +75,7 @@
   --text-inverse: #0f172a;
   
   --border-color: #243049;
+  --input-border-color: #243049;
   --border-focus: var(--primary);
   
   --glass-bg: rgba(15, 20, 34, 0.75);
@@ -120,38 +124,45 @@
   --text-sidebar: #0f172a;
   --text-sidebar-muted: #64748b;
   --border-sidebar: #e2e8f0;
+  --bg-sidebar-hover: #f1f5f9;
 }
 :root[data-sidebar-bg="dark"] {
   --bg-sidebar: #0f1422;
   --text-sidebar: #f1f5f9;
   --text-sidebar-muted: #94a3b8;
   --border-sidebar: #243049;
+  --bg-sidebar-hover: #1b2234;
 }
 :root[data-sidebar-bg="carbon"] {
   --bg-sidebar: #111622;
   --text-sidebar: #f1f5f9;
   --text-sidebar-muted: #94a3b8;
   --border-sidebar: #243049;
+  --bg-sidebar-hover: #1d2435;
 }
 :root[data-sidebar-bg="midnight"] {
   --bg-sidebar: #05070c;
   --text-sidebar: #f1f5f9;
   --text-sidebar-muted: #94a3b8;
   --border-sidebar: #111827;
+  --bg-sidebar-hover: #121824;
 }
 :root[data-sidebar-bg="primary"] {
   --bg-sidebar: hsl(var(--primary-hue), calc(var(--primary-saturation) - 20%), 12%);
   --text-sidebar: #ffffff;
   --text-sidebar-muted: rgba(255, 255, 255, 0.7);
   --border-sidebar: rgba(255, 255, 255, 0.1);
+  --bg-sidebar-hover: hsl(var(--primary-hue), calc(var(--primary-saturation) - 20%), 18%);
 }
 :root[data-sidebar-bg="glass"] {
   --bg-sidebar: rgba(15, 20, 34, 0.55);
+  --bg-sidebar-hover: rgba(255, 255, 255, 0.08);
 }
 
 /* Light Theme Sidebar Overrides for Glass */
 :root[data-theme="light"][data-sidebar-bg="glass"] {
   --bg-sidebar: rgba(255, 255, 255, 0.6);
+  --bg-sidebar-hover: rgba(0, 0, 0, 0.04);
 }
 
 /* Header Custom Background Colors */

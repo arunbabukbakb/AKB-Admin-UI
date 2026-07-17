@@ -122,8 +122,8 @@
   left: 0;
   z-index: 100;
   transition: width var(--transition-speed) var(--transition-cubic),
-              background var(--transition-speed),
-              border-color var(--transition-speed);
+    background var(--transition-speed),
+    border-color var(--transition-speed);
 }
 
 .sidebar.collapsed {
@@ -191,7 +191,7 @@
 }
 
 .sidebar-bottom-toggle-btn:hover {
-  background-color: var(--bg-card-hover);
+  background-color: var(--bg-sidebar-hover);
   color: var(--text-sidebar);
 }
 
@@ -244,12 +244,12 @@
 }
 
 .sidebar-link:hover {
-  background-color: var(--bg-card-hover);
+  background-color: var(--bg-sidebar-hover);
   color: var(--text-sidebar);
 }
 
 .sidebar-link.active {
-  background-color: var(--primary-glow);
+  background-color: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.22);
   color: var(--primary);
   font-weight: 600;
 }
@@ -371,6 +371,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: 10px;
 }
 
 .page-title {
@@ -385,6 +386,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-right: 10px;
 }
 
 .nav-action-btn {
@@ -459,16 +461,17 @@
   .sidebar {
     transform: translateX(-100%);
   }
-  
+
   .sidebar.mobile-open {
     transform: translateX(0);
     width: 220px !important;
   }
-  
+
   .sidebar.collapsed {
-    width: 220px !important; /* Keep full width drawer on mobile even if collapsed on desktop */
+    width: 220px !important;
+    /* Keep full width drawer on mobile even if collapsed on desktop */
   }
-  
+
   .sidebar.mobile-open .sidebar-brand-text,
   .sidebar.mobile-open .sidebar-link-text,
   .sidebar.mobile-open .sidebar-user-info,
@@ -477,29 +480,30 @@
   .sidebar.collapsed .sidebar-user-info {
     opacity: 1 !important;
     width: auto !important;
-    display: flex !important; /* ensure texts are shown when drawer is open on mobile */
+    display: flex !important;
+    /* ensure texts are shown when drawer is open on mobile */
   }
- 
+
   .sidebar.collapsed .sidebar-header {
     justify-content: space-between !important;
     padding: 0 1.5rem !important;
   }
- 
+
   .sidebar.collapsed .sidebar-brand {
     justify-content: flex-start !important;
     gap: 0.75rem !important;
   }
-  
+
   .sidebar.collapsed .sidebar-link {
     justify-content: flex-start !important;
     padding: 0.55rem 0.75rem !important;
   }
- 
+
   .sidebar.collapsed .sidebar-bottom-toggle-btn {
     justify-content: flex-start !important;
     padding: 0.75rem 1rem !important;
   }
-  
+
   .sidebar.collapsed .sidebar-bottom-toggle-btn span {
     display: inline !important;
   }
@@ -507,20 +511,20 @@
   .main-wrapper {
     margin-left: 0 !important;
   }
-  
+
   .navbar {
     height: 50px;
     padding: 0 1rem;
   }
-  
+
   .mobile-menu-btn {
     display: flex !important;
   }
-  
+
   .desktop-toggle-btn {
     display: none !important;
   }
-  
+
   .nav-profile-name {
     display: none !important;
   }
@@ -528,11 +532,11 @@
   .page-title {
     display: none !important;
   }
-  
+
   .content-area {
     padding: 0.75rem 0.5rem;
   }
-  
+
   .navbar-left {
     gap: 0.5rem;
   }

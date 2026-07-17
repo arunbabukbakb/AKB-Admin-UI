@@ -73,6 +73,10 @@ body {
 }
 
 /* Forms & Inputs */
+input, select, textarea, .form-control {
+  --border-color: var(--input-border-color);
+}
+
 .form-group {
   margin-bottom: 1.25rem;
 }

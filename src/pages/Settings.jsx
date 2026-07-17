@@ -1,13 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Sun, Moon, Palette, Check } from 'lucide-react';
+import { Modal } from 'react-bootstrap';
+import { Sun, Moon, Palette, Check, AlertTriangle } from 'lucide-react';
 import { setTheme, setPreset, setSidebarBg, setHeaderBg, resetTheme } from '../store/themeSlice';
+import { logout } from '../store/authSlice';
+import apiService from '../services/api';
+import { toast } from 'react-toastify';
 import './Pages.css';
 
 
 const Settings = () => {
   const dispatch = useDispatch();
   const { theme, preset, sidebarBg, headerBg } = useSelector((state) => state.theme);
+  const { user } = useSelector((state) => state.auth);
+  const [resetting, setResetting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmTextInput, setConfirmTextInput] = useState('');
+
+  // Check if role is admin
+  const isAdmin = user?.role?.codeName?.toLowerCase() === 'admin' || 
+                  user?.role?.name?.toLowerCase() === 'admin' ||
+                  user?.roleName?.toLowerCase() === 'admin';
+
+  const handleDatabaseReset = () => {
+    setConfirmTextInput('');
+    setShowConfirmModal(true);
+  };
+
+  const executeDatabaseReset = async () => {
+    if (confirmTextInput !== 'RESET') return;
+
+    setShowConfirmModal(false);
+    setResetting(true);
+    try {
+      const response = await apiService.post('Home/reset-database', {}, { timeout: 60000 });
+      if (response && response.status !== false) {
+        toast.success(response.message || "Database reset to defaults successfully! Logging out...");
+        setTimeout(() => {
+          dispatch(logout());
+          window.location.href = '/login';
+        }, 1500);
+      } else {
+        toast.error(response?.message || "Failed to reset database.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "An error occurred while resetting the database.");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const presets = [
     { id: 'blue', name: 'cyber blue', colorClass: 'blue' },
     { id: 'purple', name: 'electric violet', colorClass: 'purple' },
@@ -144,6 +186,123 @@ const Settings = () => {
         </div>
       </section>
 
+      {/* System Settings & Actions */}
+      {isAdmin && (
+        <section className="settings-section" style={{ marginTop: '2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+            <h2 style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--danger)' }}>
+              <AlertTriangle size={20} />
+              <span>System Administration</span>
+            </h2>
+          </div>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+            Perform sensitive administrative and maintenance operations. Wiping data cannot be undone.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.25)', backgroundColor: 'rgba(239, 68, 68, 0.02)' }}>
+              <div style={{ paddingRight: '1rem' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                  Reset Database to Default
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                  Wipes all transaction tables, user logs, branches, and custom data, restoring initial template seeded tables.
+                </p>
+              </div>
+              <button
+                className="btn btn-danger"
+                onClick={handleDatabaseReset}
+                disabled={resetting}
+                style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.5rem 1.25rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                  boxShadow: '0 0 10px rgba(239, 68, 68, 0.25)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {resetting ? 'Resetting...' : 'Reset Database'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Confirmation Modal */}
+      <Modal 
+        show={showConfirmModal} 
+        onHide={() => setShowConfirmModal(false)}
+        centered
+        backdrop="static"
+        contentClassName="glass-panel"
+        style={{ backdropFilter: 'blur(8px)', backgroundColor: 'rgba(0,0,0,0.4)' }}
+      >
+        <Modal.Header closeButton style={{ borderBottom: '1px solid var(--border-color)', background: 'transparent' }}>
+          <Modal.Title style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--danger)', fontSize: '1.1rem', fontWeight: 700 }}>
+            <AlertTriangle size={20} />
+            <span>Confirm Database Reset</span>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ background: 'transparent', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ padding: '0.75rem', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.15)', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <AlertTriangle size={18} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
+                <strong>WARNING:</strong> This action is highly destructive and irreversible. It will drop the entire database schema and delete all companies, branches, logs, customers, and custom user data.
+              </div>
+            </div>
+            
+            <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0 }}>
+              To confirm this action, please type the word <strong style={{ color: 'var(--text-main)' }}>RESET</strong> in the box below:
+            </p>
+
+            <input
+              type="text"
+              className="form-control"
+              value={confirmTextInput}
+              onChange={(e) => setConfirmTextInput(e.target.value)}
+              placeholder="Type RESET to confirm"
+              style={{
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.85rem',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-main)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)'
+              }}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer style={{ borderTop: '1px solid var(--border-color)', background: 'transparent', padding: '1rem 1.5rem' }}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setShowConfirmModal(false)}
+            style={{ fontSize: '0.8rem', padding: '0.4rem 1rem', borderRadius: '6px' }}
+          >
+            Cancel
+          </button>
+          <button 
+            className="btn btn-danger" 
+            onClick={executeDatabaseReset}
+            disabled={confirmTextInput !== 'RESET' || resetting}
+            style={{ 
+              fontSize: '0.8rem', 
+              padding: '0.4rem 1.25rem', 
+              borderRadius: '6px', 
+              backgroundColor: confirmTextInput === 'RESET' ? 'var(--danger)' : 'rgba(239, 68, 68, 0.4)', 
+              border: 'none',
+              color: 'white'
+            }}
+          >
+            {resetting ? 'Resetting...' : 'Yes, Delete and Reset'}
+          </button>
+        </Modal.Footer>
+      </Modal>
 
     </div>
   );
